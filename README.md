@@ -5,7 +5,7 @@ R128 loudness normalisation, generates waveform peaks, computes
 Chromaprint fingerprints, and detects silence for podcast and video
 production workflows.
 
-![AudioSuite playground](docs/audio-suite-playground.png)
+![AudioSuite playground](docs/audio-suite-workspace-fresh.png)
 
 ## Status
 
