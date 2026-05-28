@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    environment:
+      AUDIO_SUITE_JOB_ROOT: /tmp/audio-suite
+      AUDIO_SUITE_ARTIFACT_TTL_SECONDS: 3600
+    ports:
+      - "8000:8000"

@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    environment:
+      AUDIO_SUITE_JOB_ROOT: /tmp/audio-suite
+      AUDIO_SUITE_ARTIFACT_TTL_SECONDS: 3600
+    ports:
+      - "8000:8000"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      NEXT_PUBLIC_AUDIO_SUITE_API_BASE_URL: http://worker:8000
+    depends_on:
+      - worker
+    ports:
+      - "3000:3000"
