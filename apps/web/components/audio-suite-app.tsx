@@ -71,6 +71,7 @@ export function AudioSuiteApp() {
     minDurationSec: "0.5",
     trim: true,
   });
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
   const stopPollingRef = useRef(false);
 
   const fingerprintSamples = useMemo(
@@ -81,6 +82,14 @@ export function AudioSuiteApp() {
   function resetInputsForExternalSource() {
     setFile(null);
     setSelectedSample(null);
+  }
+
+  function applySelectedFile(nextFile: File | null) {
+    setFile(nextFile);
+    if (nextFile) {
+      setSourceUrl("");
+      setSelectedSample(null);
+    }
   }
 
   function currentPrimarySampleId() {
@@ -233,7 +242,29 @@ export function AudioSuiteApp() {
         description="The same input panel feeds probe, extract, loudnorm, waveform, fingerprint, and silence operations."
       >
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <label className="group flex min-h-60 cursor-pointer flex-col items-center justify-center gap-4 rounded-[2rem] border border-dashed border-cyan-400/35 bg-cyan-400/5 p-8 text-center transition hover:border-cyan-300 hover:bg-cyan-400/8">
+          <label
+            className={`group flex min-h-60 cursor-pointer flex-col items-center justify-center gap-4 rounded-[2rem] border border-dashed p-8 text-center transition ${
+              isDraggingFile
+                ? "border-cyan-200 bg-cyan-300/12 shadow-[0_0_0_1px_rgba(103,232,249,0.3)]"
+                : "border-cyan-400/35 bg-cyan-400/5 hover:border-cyan-300 hover:bg-cyan-400/8"
+            }`}
+            onDragEnter={() => setIsDraggingFile(true)}
+            onDragLeave={(event) => {
+              if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                return;
+              }
+              setIsDraggingFile(false);
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setIsDraggingFile(true);
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              setIsDraggingFile(false);
+              applySelectedFile(event.dataTransfer.files?.[0] ?? null);
+            }}
+          >
             <UploadCloud className="size-10 text-cyan-300" />
             <div>
               <p className="text-lg font-medium text-white">{file ? file.name : "Drop audio or video here"}</p>
@@ -246,9 +277,8 @@ export function AudioSuiteApp() {
               type="file"
               accept="audio/*,video/*"
               onChange={(event) => {
-                setFile(event.target.files?.[0] ?? null);
-                setSourceUrl("");
-                setSelectedSample(null);
+                applySelectedFile(event.target.files?.[0] ?? null);
+                setIsDraggingFile(false);
               }}
             />
           </label>

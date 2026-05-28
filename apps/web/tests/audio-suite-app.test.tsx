@@ -19,4 +19,15 @@ describe("AudioSuiteApp", () => {
     fireEvent.click(button);
     expect(button).toHaveClass("border-cyan-300/60");
   });
+
+  it("accepts a dropped file in the upload area", () => {
+    render(<AudioSuiteApp />);
+    const dropzone = screen.getByText("Drop audio or video here").closest("label");
+    const file = new File(["demo"], "voiceover.mp3", { type: "audio/mpeg" });
+
+    expect(dropzone).not.toBeNull();
+    fireEvent.drop(dropzone!, { dataTransfer: { files: [file] } });
+
+    expect(screen.getByText("voiceover.mp3")).toBeInTheDocument();
+  });
 });
