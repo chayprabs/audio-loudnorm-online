@@ -22,6 +22,7 @@ from .media import (
     render_waveform_png,
     run_command,
 )
+from .sample_catalog import get_sample_path
 from .settings import settings
 
 PRESETS = {
@@ -80,8 +81,8 @@ async def stage_input(
         raise HTTPException(status_code=400, detail="Provide a file, source_url, or sample_id.")
 
     if sample_id:
-        sample_path = Path(__file__).resolve().parents[3] / "samples" / sample_id
-        if not sample_path.exists():
+        sample_path = get_sample_path(sample_id)
+        if sample_path is None or not sample_path.exists():
             raise HTTPException(status_code=404, detail="Sample not found.")
         target = job_dir / sample_path.name
         shutil.copy2(sample_path, target)

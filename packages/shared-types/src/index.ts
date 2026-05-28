@@ -72,3 +72,5 @@ export interface SilenceResponse {
   ranges: SilenceRange[];
   trimmedPath?: string;
 }
+
+export * from "./samples";

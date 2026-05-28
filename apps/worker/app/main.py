@@ -24,6 +24,7 @@ from .operations import (
     probe_audio,
     stage_input,
 )
+from .sample_catalog import list_samples
 from .schemas import (
     AsyncJobAccepted,
     ExtractResponse,
@@ -95,6 +96,11 @@ async def _run_async_job(
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/v1/samples")
+async def samples() -> list[dict]:
+    return list_samples()
 
 
 @app.get("/v1/jobs/{job_id}", response_model=JobStatusResponse)

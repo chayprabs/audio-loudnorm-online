@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { AUDIO_SAMPLES, type AudioSample } from "@audio-suite/shared-types";
 import { pollJob, type AsyncJobResponse, type AsyncJobStatus } from "@audio-suite/shared-worker-runtime";
 import { ResultPane, SectionCard } from "@audio-suite/shared-ui";
 import { AudioLines, Link2, UploadCloud, Waves } from "lucide-react";
@@ -17,30 +18,13 @@ const tabs = [
   { id: "silence", label: "Silence" },
 ] as const;
 
-const samples = [
-  {
-    id: "podcast-demo",
-    label: "Podcast clip",
-    sourceUrl: "https://filesamples.com/samples/audio/mp3/sample3.mp3",
-  },
-  {
-    id: "music-demo",
-    label: "Music clip",
-    sourceUrl: "https://filesamples.com/samples/audio/mp3/sample1.mp3",
-  },
-  {
-    id: "voiceover-demo",
-    label: "Voiceover with silence",
-    sourceUrl: "https://filesamples.com/samples/audio/mp3/sample2.mp3",
-  },
-] as const;
-
 type FeatureId = (typeof tabs)[number]["id"] | "probe";
 
 export function AudioSuiteApp() {
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>("loudnorm");
   const [file, setFile] = useState<File | null>(null);
   const [sourceUrl, setSourceUrl] = useState("");
+  const [selectedSample, setSelectedSample] = useState<AudioSample | null>(AUDIO_SAMPLES[0] ?? null);
   const [result, setResult] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
   const [job, setJob] = useState<AsyncJobStatus | null>(null);
@@ -55,8 +39,11 @@ export function AudioSuiteApp() {
       if (file) {
         form.set("file", file);
       }
-      if (sourceUrl) {
+      if (!file && sourceUrl) {
         form.set("source_url", sourceUrl);
+      }
+      if (!file && !sourceUrl && selectedSample) {
+        form.set("sample_id", selectedSample.id);
       }
       form.set("async_mode", "true");
 
@@ -148,7 +135,10 @@ export function AudioSuiteApp() {
               className="hidden"
               type="file"
               accept="audio/*,video/*"
-              onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+              onChange={(event) => {
+                setFile(event.target.files?.[0] ?? null);
+                setSelectedSample(null);
+              }}
             />
           </label>
 
@@ -161,24 +151,36 @@ export function AudioSuiteApp() {
                   className="w-full bg-transparent text-sm text-slate-100 outline-none placeholder:text-slate-500"
                   placeholder="https://example.com/episode.mp4"
                   value={sourceUrl}
-                  onChange={(event) => setSourceUrl(event.target.value)}
+                  onChange={(event) => {
+                    setSourceUrl(event.target.value);
+                    if (event.target.value) {
+                      setFile(null);
+                      setSelectedSample(null);
+                    }
+                  }}
                 />
               </div>
             </div>
             <div className="space-y-2">
               <p className="text-sm font-medium text-slate-200">Sample clips</p>
               <div className="grid gap-2">
-                {samples.map((sample) => (
+                {AUDIO_SAMPLES.filter((sample) => sample.category !== "fingerprint").map((sample) => (
                   <button
                     key={sample.id}
-                    className="rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-left text-sm text-slate-200 transition hover:border-cyan-300/50 hover:bg-slate-900"
+                    className={`rounded-2xl border px-4 py-3 text-left text-sm text-slate-200 transition ${
+                      selectedSample?.id === sample.id
+                        ? "border-cyan-300/60 bg-cyan-300/10"
+                        : "border-white/10 bg-slate-900/70 hover:border-cyan-300/50 hover:bg-slate-900"
+                    }`}
                     onClick={() => {
-                      setSourceUrl(sample.sourceUrl);
                       setFile(null);
+                      setSourceUrl("");
+                      setSelectedSample(sample);
                     }}
                     type="button"
                   >
-                    {sample.label}
+                    <span className="block font-medium text-white">{sample.label}</span>
+                    <span className="mt-1 block text-xs text-slate-400">{sample.description}</span>
                   </button>
                 ))}
               </div>
