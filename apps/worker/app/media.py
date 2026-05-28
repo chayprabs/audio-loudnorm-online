@@ -120,12 +120,18 @@ def downsample_levels(samples: list[float], zoom_sizes: Iterable[int]) -> list[d
     return levels
 
 
-def fpcalc_json(input_path: Path) -> dict[str, Any]:
-    completed = run_command(["fpcalc", "-json", str(input_path)])
+def fpcalc_json(input_path: Path, *, raw: bool = False) -> dict[str, Any]:
+    args = ["fpcalc"]
+    if raw:
+        args.append("-raw")
+    args.extend(["-json", str(input_path)])
+    completed = run_command(args)
     return json.loads(completed.stdout)
 
 
-def decode_fingerprint(fingerprint: str) -> list[int]:
+def decode_fingerprint(fingerprint: str | list[int]) -> list[int]:
+    if isinstance(fingerprint, list):
+        return [int(part) for part in fingerprint]
     return [int(part) for part in fingerprint.split(",") if part]
 
 

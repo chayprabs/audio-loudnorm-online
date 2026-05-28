@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import random
 import struct
 import wave
 from pathlib import Path
@@ -53,6 +54,51 @@ def tone(
     return output
 
 
+def melodic_phrase(*, variant: bool = False) -> list[tuple[float]]:
+    freqs = [130.81, 146.83, 164.81, 174.61, 196.0, 220.0, 246.94, 261.63, 293.66, 329.63]
+    output: list[tuple[float]] = []
+    for segment in range(32):
+        freq = freqs[(segment * 2) % len(freqs)]
+        frame_count = int(SAMPLE_RATE * 0.28)
+        for index in range(frame_count):
+            t = index / SAMPLE_RATE
+            attack = min(1.0, index / (0.02 * SAMPLE_RATE))
+            release = min(1.0, (frame_count - index) / (0.03 * SAMPLE_RATE))
+            envelope = attack * release
+            sample = 0.22 * envelope * math.sin(2 * math.pi * freq * t)
+            sample += 0.11 * envelope * math.sin(2 * math.pi * freq * 2 * t)
+            sample += 0.05 * envelope * math.sin(2 * math.pi * (freq * 1.498) * t)
+            if variant:
+                sample += 0.01 * math.sin(2 * math.pi * 29 * t)
+                sample *= 0.98
+            output.append((sample,))
+        output.extend([(0.0,)] * int(SAMPLE_RATE * 0.03))
+    return output
+
+
+def textured_music() -> list[tuple[float, float]]:
+    rng = random.Random(7)
+    base_freqs = [82.41, 98.0, 123.47, 155.56, 207.65]
+    output: list[tuple[float, float]] = []
+    for segment in range(40):
+        left_freq = base_freqs[segment % len(base_freqs)] * (1 + (segment % 3) * 0.25)
+        right_freq = left_freq * 1.5
+        frame_count = int(SAMPLE_RATE * 0.22)
+        for index in range(frame_count):
+            t = index / SAMPLE_RATE
+            gate = 1.0 if (index % (SAMPLE_RATE // 40)) < (SAMPLE_RATE // 200) else 0.0
+            noise = (rng.random() * 2 - 1) * 0.12
+            left = 0.18 * math.sin(2 * math.pi * left_freq * t)
+            left += 0.12 * math.sin(2 * math.pi * left_freq * 3.1 * t)
+            left += 0.08 * noise + 0.12 * gate
+            right = 0.16 * math.sin(2 * math.pi * right_freq * t)
+            right += 0.1 * math.sin(2 * math.pi * right_freq * 2.3 * t)
+            right += 0.06 * noise + 0.1 * gate
+            output.append((left, right))
+        output.extend([(0.0, 0.0)] * int(SAMPLE_RATE * 0.02))
+    return output
+
+
 def speech_like(seconds: float, base_frequency: float, amplitude: float = 0.24) -> list[tuple[float]]:
     frame_count = int(SAMPLE_RATE * seconds)
     output: list[tuple[float]] = []
@@ -91,7 +137,7 @@ def build_podcast() -> list[tuple[float]]:
 
 
 def build_music() -> list[tuple[float, float]]:
-    return tone(seconds=10.0, frequency=220, channels=2, amplitude=0.32, phase_offset=0.15)
+    return textured_music()
 
 
 def build_voiceover_with_silence() -> list[tuple[float]]:
@@ -102,8 +148,8 @@ def main() -> None:
     podcast = build_podcast()
     music = build_music()
     voiceover = build_voiceover_with_silence()
-    duplicate_base = speech_like(4.8, 185, amplitude=0.23)
-    duplicate_variant = with_subtle_offset(with_gain(duplicate_base, 0.96), 31)
+    duplicate_base = melodic_phrase()
+    duplicate_variant = melodic_phrase(variant=True)
 
     write_wav(OUTPUT_DIR / "podcast-demo.wav", 1, podcast)
     write_wav(OUTPUT_DIR / "music-demo.wav", 2, music)

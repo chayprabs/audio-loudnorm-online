@@ -285,8 +285,8 @@ def fingerprint_audio(*, input_path: Path) -> dict[str, Any]:
 
 
 def compare_fingerprints(*, left_path: Path, right_path: Path) -> dict[str, Any]:
-    left = fingerprint_audio(input_path=left_path)
-    right = fingerprint_audio(input_path=right_path)
+    left = fpcalc_json(left_path, raw=True)
+    right = fpcalc_json(right_path, raw=True)
     score = cosine_like_similarity(
         decode_fingerprint(left["fingerprint"]),
         decode_fingerprint(right["fingerprint"]),
@@ -294,8 +294,8 @@ def compare_fingerprints(*, left_path: Path, right_path: Path) -> dict[str, Any]
     return {
         "algorithm": "chromaprint",
         "score": score,
-        "left_duration_sec": left["duration_sec"],
-        "right_duration_sec": right["duration_sec"],
+        "left_duration_sec": float(left.get("duration", 0)),
+        "right_duration_sec": float(right.get("duration", 0)),
     }
 
 
