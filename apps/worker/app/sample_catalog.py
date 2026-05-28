@@ -6,7 +6,17 @@ from pathlib import Path
 from typing import Any
 
 
-SAMPLES_DIR = Path(__file__).resolve().parents[3] / "samples"
+def _find_project_root() -> Path:
+    current = Path(__file__).resolve()
+    for parent in current.parents:
+        manifest = parent / "samples" / "manifest.json"
+        if manifest.exists():
+            return parent
+    raise RuntimeError("Could not resolve AudioSuite project root from sample catalog.")
+
+
+PROJECT_ROOT = _find_project_root()
+SAMPLES_DIR = PROJECT_ROOT / "samples"
 MANIFEST_PATH = SAMPLES_DIR / "manifest.json"
 
 

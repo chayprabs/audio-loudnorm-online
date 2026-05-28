@@ -16,6 +16,7 @@ COPY apps/worker/requirements.txt /tmp/requirements.txt
 RUN pip install --upgrade pip && pip install -r /tmp/requirements.txt
 
 COPY apps/worker /app
+COPY samples /app/samples
 
 EXPOSE 8000
 

@@ -84,10 +84,24 @@ async def _run_async_job(
     runner,
 ) -> None:
     try:
+        if not job_store.exists(job_id):
+            raise RuntimeError(f"Unknown job id {job_id}")
+        if job_store.get(job_id).cancelled:
+            await _deliver_webhook(webhook_url, {"job_id": job_id, "status": "cancelled"})
+            return
+
         job_store.update_progress(job_id, 10, status="running")
+        job_store.update_progress(job_id, 40)
         result = await asyncio.to_thread(runner)
+        if job_store.get(job_id).cancelled:
+            await _deliver_webhook(webhook_url, {"job_id": job_id, "status": "cancelled"})
+            return
+        job_store.update_progress(job_id, 90)
         job_store.complete(job_id, result)
-        await _deliver_webhook(webhook_url, {"job_id": job_id, "status": "completed", "result": result})
+        await _deliver_webhook(
+            webhook_url,
+            {"job_id": job_id, "status": "completed", "result": result},
+        )
     except Exception as exc:
         job_store.fail(job_id, str(exc))
         await _deliver_webhook(webhook_url, {"job_id": job_id, "status": "failed", "error": str(exc)})

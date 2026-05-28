@@ -46,6 +46,10 @@ class JobStore:
         with self._lock:
             return self._items[job_id]
 
+    def exists(self, job_id: str) -> bool:
+        with self._lock:
+            return job_id in self._items
+
     def update_progress(self, job_id: str, progress: int, status: str | None = None) -> JobRecord:
         with self._lock:
             job = self._items[job_id]
@@ -79,6 +83,10 @@ class JobStore:
             job.status = "cancelled"
             job.updated_at = datetime.now(timezone.utc)
             return job
+
+    def reset(self) -> None:
+        with self._lock:
+            self._items.clear()
 
 
 job_store = JobStore()

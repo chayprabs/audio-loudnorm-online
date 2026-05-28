@@ -7,8 +7,12 @@ production workflows.
 
 ## Status
 
-Initial repository scaffold and core worker/web implementation are in
-progress on `cursor/audio-suite-build`.
+The repository now includes:
+
+- A Next.js 15 playground in `apps/web`
+- A FastAPI worker in `apps/worker`
+- Local synthetic sample fixtures in `samples/`
+- Async job polling, cancellation, and webhook delivery
 
 ## Stack
 
@@ -32,6 +36,25 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
+```
+
+## Sample fixtures
+
+Synthetic fixtures live in `samples/` and back the in-app sample picker,
+worker smoke tests, and future acceptance checks.
+
+```bash
+python scripts/generate_sample_fixtures.py
+```
+
+## Container smoke check
+
+When Docker Desktop is running, this script builds the worker image and
+exercises sample-based probe, extract, loudnorm, peaks, fingerprint,
+and silence endpoints:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/smoke_worker_container.ps1
 ```
 
 ## License
