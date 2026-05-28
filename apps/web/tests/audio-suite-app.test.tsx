@@ -28,6 +28,6 @@ describe("AudioSuiteApp", () => {
     expect(dropzone).not.toBeNull();
     fireEvent.drop(dropzone!, { dataTransfer: { files: [file] } });
 
-    expect(screen.getByText("voiceover.mp3")).toBeInTheDocument();
+    expect(screen.getAllByText("voiceover.mp3").length).toBeGreaterThan(0);
   });
 });
