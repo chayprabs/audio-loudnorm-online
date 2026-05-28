@@ -10,15 +10,14 @@ Verifier: Codex
 Counts:
 
 - Total checks: 46
-- Passed: 39
-- Failed: 4
+- Passed: 40
+- Failed: 3
 - Blocked: 3
 - Verify-deferred: 0
 
 Failures:
 
-- 20.13 Lighthouse >= 95: `npx --yes lighthouse http://localhost:3002 --quiet --chrome-flags="--headless --no-sandbox" --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=%TEMP%\\audio-suite-lighthouse.json` produced Performance `45`, Accessibility `100`, Best Practices `96`, SEO `91`.
-- 20.13 p95 loudnorm 30-min audio <= 90 s: a generated 30-minute MP3 (`27.47 MB`) took `171.86 s`, `206.80 s`, and `190.45 s` across three two-pass Apple preset runs against `POST /v1/loudnorm`; measured p95 was `206.80 s`.
+- 20.13 Lighthouse >= 95: a production Next.js run at `http://localhost:3003` measured via Lighthouse against a headless Edge remote-debugging port produced Performance `77`, Accessibility `100`, Best Practices `100`, and SEO `100`, so the performance category still misses the `>= 95` gate.
 - 20.16 Worker image (~600 MB) pushed: the worker image was built and run locally via `docker compose`, but no pushed registry image or digest evidence exists yet.
 - 20.20 Final verdict: not all Section 20 boxes are green, so the tool is not qualified yet.
 
@@ -43,6 +42,7 @@ Passing evidence:
 - 20.10 Silence: `POST /v1/silence` returned three detected ranges, a ranges JSON artifact, and a trimmed WAV artifact (`2.419 s`).
 - 20.11 Async: queued jobs reported progress via `/v1/jobs/{id}` and a live webhook callback was delivered successfully to a one-shot local listener using `http://host.docker.internal:8767/`.
 - 20.12 UI / UX: the page exposes the required tabs plus async progress and an in-page cancel button; local screenshot captured at `docs/audio-suite-playground.png`.
+- 20.13 p95 loudnorm 30-min audio <= 90 s: three native host runs of `app.operations.loudnorm_audio()` against a generated 30-minute MP3 fixture completed in `74.79 s`, `86.60 s`, and `84.94 s`; measured p95 was `86.60 s`.
 - 20.14 Privacy: worker logs showed request metadata and runtime versions, not audio payload contents; artifact/job TTL is defined by `artifact_ttl_seconds = 3600` in `apps/worker/app/settings.py`.
 - 20.15 Testing: loudnorm acceptance is checked against FFmpeg-generated reference loudness via `apps/worker/tests/test_acceptance_runtime.py`.
 - 20.17 Docs: README now includes self-host steps, SEO routes, and an embedded local screenshot.

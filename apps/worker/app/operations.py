@@ -10,9 +10,11 @@ import httpx
 from fastapi import HTTPException, UploadFile
 
 from .media import (
+    FFMPEG_PARALLEL_ARGS,
     cosine_like_similarity,
     decode_fingerprint,
     downsample_levels,
+    extract_last_json_block,
     ffprobe_json,
     fpcalc_json,
     loudnorm_measure,
@@ -53,6 +55,8 @@ CHANNEL_MAP = {
     "stereo": 2,
     "5.1": 6,
 }
+
+LOUDNORM_VERIFY_THRESHOLD_SEC = 5 * 60
 
 
 def create_job_dir(job_id: str) -> Path:
@@ -204,6 +208,7 @@ def loudnorm_audio(
         target = PRESETS[preset]
 
     first_pass = loudnorm_measure(input_path, target["I"], target["LRA"], target["TP"])
+    input_duration_sec = float(ffprobe_json(input_path).get("format", {}).get("duration", 0) or 0)
     output_path = output_dir / "loudnorm.wav"
     if mode == "two-pass":
         filter_args = (
@@ -221,6 +226,7 @@ def loudnorm_audio(
     ffmpeg_args = [
         "ffmpeg",
         "-hide_banner",
+        *FFMPEG_PARALLEL_ARGS,
         "-y",
         "-i",
         str(input_path),
@@ -228,13 +234,16 @@ def loudnorm_audio(
         filter_args,
         str(output_path),
     ]
-    run_command(ffmpeg_args)
-    second_pass = loudnorm_measure(output_path, target["I"], target["LRA"], target["TP"])
+    second_pass = extract_last_json_block(run_command(ffmpeg_args).stderr)
+    if input_duration_sec <= LOUDNORM_VERIFY_THRESHOLD_SEC:
+        after = parse_loudnorm_stats(loudnorm_measure(output_path, target["I"], target["LRA"], target["TP"]), "input")
+    else:
+        after = parse_loudnorm_stats(second_pass, "output")
     return {
         "mode": mode,
         "preset": preset,
         "before": parse_loudnorm_stats(first_pass, "input"),
-        "after": parse_loudnorm_stats(second_pass, "input"),
+        "after": after,
         "target": target,
         "output_path": output_path,
         "ffmpeg_args": ffmpeg_args,

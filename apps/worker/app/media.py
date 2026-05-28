@@ -15,6 +15,9 @@ class CommandError(RuntimeError):
     pass
 
 
+FFMPEG_PARALLEL_ARGS = ["-threads", "0", "-filter_threads", "0"]
+
+
 def run_command(args: list[str], cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
     process = subprocess.run(
         args,
@@ -59,6 +62,7 @@ def loudnorm_measure(input_path: Path, target_i: float, target_lra: float, targe
         [
             "ffmpeg",
             "-hide_banner",
+            *FFMPEG_PARALLEL_ARGS,
             "-i",
             str(input_path),
             "-af",
