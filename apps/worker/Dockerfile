@@ -7,7 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     AUDIO_SUITE_ARTIFACT_TTL_SECONDS=3600
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ffmpeg chromaprint-tools curl \
+    && apt-get install -y --no-install-recommends ffmpeg libchromaprint-tools curl \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

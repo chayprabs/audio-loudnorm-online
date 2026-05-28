@@ -38,6 +38,10 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
+Docker Compose uses `AUDIO_SUITE_WEB_PORT`,
+`AUDIO_SUITE_WORKER_PORT`, and `AUDIO_SUITE_WORKER_PUBLIC_URL` when
+you need non-default host ports.
+
 ## Sample fixtures
 
 Synthetic fixtures live in `samples/` and back the in-app sample picker,
