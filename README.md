@@ -55,6 +55,11 @@ docker compose up --build -d
 Then open `http://localhost:3002` for the playground and
 `http://localhost:8000/health` for the worker health check.
 
+The root route is a static landing page for fast discovery and SEO.
+Open `http://localhost:3002/workspace` for the full interactive
+AudioSuite UI with tabs, async progress, cancellation, and artifact
+links.
+
 The worker logs its detected `ffmpeg` and `fpcalc` versions during
 startup so you can verify the runtime binaries inside the container:
 
