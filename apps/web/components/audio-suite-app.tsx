@@ -730,6 +730,7 @@ function FeatureControls(props: {
                 <span className="text-sm font-semibold text-stone-900">Or upload file B</span>
                 <input
                   accept="audio/*,video/*"
+                  aria-label="Or upload file B"
                   className="block w-full text-sm text-stone-600 file:mr-3 file:rounded-full file:border-0 file:bg-stone-950 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-stone-50"
                   onChange={(event) => props.onCompareFileB(event.target.files?.[0] ?? null)}
                   type="file"
