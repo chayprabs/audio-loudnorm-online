@@ -137,6 +137,7 @@ export function AudioSuiteApp() {
   function resetInputsForExternalSource() {
     setFile(null);
     setSelectedSample(null);
+    setCompareFileB(null);
   }
 
   function applySelectedFile(nextFile: File | null) {
@@ -144,7 +145,6 @@ export function AudioSuiteApp() {
     if (nextFile) {
       setSourceUrl("");
       setSelectedSample(null);
-      setCompareFileB(null);
     }
   }
 
@@ -242,7 +242,7 @@ export function AudioSuiteApp() {
       if (file) {
         form.set("file", file);
       }
-      if (compareFileB) {
+      if (feature === "fingerprint" && fingerprintSettings.compareMode && compareFileB) {
         form.set("file_b", compareFileB);
       }
       if (!file && sourceUrl) {
@@ -461,6 +461,7 @@ export function AudioSuiteApp() {
                     onClick={() => {
                       setFile(null);
                       setSourceUrl("");
+                      setCompareFileB(null);
                       setSelectedSample(sample);
                     }}
                     type="button"
@@ -524,7 +525,12 @@ export function AudioSuiteApp() {
                   silenceSettings={silenceSettings}
                   onCompareFileB={applyCompareFileB}
                   onExtractChange={setExtractSettings}
-                  onFingerprintChange={setFingerprintSettings}
+                  onFingerprintChange={(value) => {
+                    if (!value.compareMode && fingerprintSettings.compareMode) {
+                      setCompareFileB(null);
+                    }
+                    setFingerprintSettings(value);
+                  }}
                   onLoudnormChange={setLoudnormSettings}
                   onSilenceChange={setSilenceSettings}
                 />

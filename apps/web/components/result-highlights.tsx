@@ -1,3 +1,5 @@
+import React from "react";
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_AUDIO_SUITE_API_BASE_URL?.replace(/\/$/, "") ?? "http://localhost:8000";
 
