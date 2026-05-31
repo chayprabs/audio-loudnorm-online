@@ -59,6 +59,30 @@ CHANNEL_MAP = {
 LOUDNORM_VERIFY_THRESHOLD_SEC = 5 * 60
 
 
+def validate_extract_params(*, output_format: str, downmix: str) -> None:
+    if output_format not in EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"Unsupported output format '{output_format}'.")
+    if downmix != "keep" and downmix not in CHANNEL_MAP:
+        raise HTTPException(status_code=400, detail=f"Unsupported downmix mode '{downmix}'.")
+
+
+def validate_loudnorm_params(
+    *,
+    preset: str,
+    mode: str,
+    target_i: float | None,
+    target_lra: float | None,
+    target_tp: float | None,
+) -> None:
+    if mode not in ("single-pass", "two-pass"):
+        raise HTTPException(status_code=400, detail=f"Unsupported loudnorm mode '{mode}'.")
+    if preset == "custom":
+        if target_i is None or target_lra is None or target_tp is None:
+            raise HTTPException(status_code=400, detail="Custom loudnorm requires I, LRA, and TP targets.")
+    elif preset not in PRESETS:
+        raise HTTPException(status_code=400, detail=f"Unknown loudnorm preset '{preset}'.")
+
+
 def create_job_dir(job_id: str) -> Path:
     job_dir = settings.job_root / job_id
     job_dir.mkdir(parents=True, exist_ok=True)
@@ -165,6 +189,7 @@ def extract_audio(
     downmix: str,
     output_dir: Path,
 ) -> dict[str, Any]:
+    validate_extract_params(output_format=output_format, downmix=downmix)
     output_path = output_dir / f"extract{EXTENSIONS[output_format]}"
     args = ["ffmpeg", "-hide_banner", "-y", "-i", str(input_path)]
     if sample_rate:
@@ -180,10 +205,11 @@ def extract_audio(
         args += FORMAT_ARGS[output_format]
     args.append(str(output_path))
     run_command(args)
+    effective_channels = CHANNEL_MAP[downmix] if downmix != "keep" else channels
     return {
         "format": output_format,
         "sample_rate": sample_rate,
-        "channels": channels,
+        "channels": effective_channels,
         "bit_depth": bit_depth,
         "downmix": downmix,
         "output_path": output_path,
@@ -200,9 +226,14 @@ def loudnorm_audio(
     target_lra: float | None,
     target_tp: float | None,
 ) -> dict[str, Any]:
+    validate_loudnorm_params(
+        preset=preset,
+        mode=mode,
+        target_i=target_i,
+        target_lra=target_lra,
+        target_tp=target_tp,
+    )
     if preset == "custom":
-        if target_i is None or target_lra is None or target_tp is None:
-            raise HTTPException(status_code=400, detail="Custom loudnorm requires I, LRA, and TP targets.")
         target = {"I": target_i, "LRA": target_lra, "TP": target_tp}
     else:
         target = PRESETS[preset]

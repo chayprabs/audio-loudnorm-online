@@ -24,6 +24,8 @@ from .operations import (
     loudnorm_audio,
     probe_audio,
     stage_input,
+    validate_extract_params,
+    validate_loudnorm_params,
 )
 from .sample_catalog import list_samples
 from .schemas import (
@@ -185,6 +187,7 @@ async def extract(
     async_mode: bool = Form(default=False),
     webhook_url: str | None = Form(default=None),
 ):
+    validate_extract_params(output_format=output_format, downmix=downmix)
     job = job_store.create("extract")
     job_dir = create_job_dir(job.id)
     staged_path = await stage_input(job_dir=job_dir, upload=file, source_url=source_url, sample_id=sample_id)
@@ -226,6 +229,13 @@ async def loudnorm(
     async_mode: bool = Form(default=False),
     webhook_url: str | None = Form(default=None),
 ):
+    validate_loudnorm_params(
+        preset=preset,
+        mode=mode,
+        target_i=target_i,
+        target_lra=target_lra,
+        target_tp=target_tp,
+    )
     job = job_store.create("loudnorm")
     job_dir = create_job_dir(job.id)
     staged_path = await stage_input(job_dir=job_dir, upload=file, source_url=source_url, sample_id=sample_id)
