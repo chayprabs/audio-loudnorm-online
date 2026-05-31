@@ -25,6 +25,7 @@ from .operations import (
     probe_audio,
     stage_input,
     validate_extract_params,
+    validate_fingerprint_params,
     validate_loudnorm_params,
 )
 from .sample_catalog import list_samples
@@ -306,6 +307,15 @@ async def fingerprint(
     async_mode: bool = Form(default=False),
     webhook_url: str | None = Form(default=None),
 ):
+    validate_fingerprint_params(
+        compare_mode=compare_mode,
+        upload=file,
+        upload_b=file_b,
+        source_url=source_url,
+        source_url_b=source_url_b,
+        sample_id=sample_id,
+        sample_id_b=sample_id_b,
+    )
     job = job_store.create("fingerprint")
     job_dir = create_job_dir(job.id)
     left_path = await stage_input(job_dir=job_dir / "a", upload=file, source_url=source_url, sample_id=sample_id)

@@ -83,6 +83,33 @@ def validate_loudnorm_params(
         raise HTTPException(status_code=400, detail=f"Unknown loudnorm preset '{preset}'.")
 
 
+def _has_staged_input(
+    upload: UploadFile | None,
+    source_url: str | None,
+    sample_id: str | None,
+) -> bool:
+    return any([upload, source_url, sample_id])
+
+
+def validate_fingerprint_params(
+    *,
+    compare_mode: bool,
+    upload: UploadFile | None,
+    upload_b: UploadFile | None,
+    source_url: str | None,
+    source_url_b: str | None,
+    sample_id: str | None,
+    sample_id_b: str | None,
+) -> None:
+    if not _has_staged_input(upload, source_url, sample_id):
+        raise HTTPException(status_code=400, detail="Provide a file, source_url, or sample_id.")
+    if compare_mode and not _has_staged_input(upload_b, source_url_b, sample_id_b):
+        raise HTTPException(
+            status_code=400,
+            detail="Compare mode requires a second file, source_url_b, or sample_id_b.",
+        )
+
+
 def create_job_dir(job_id: str) -> Path:
     job_dir = settings.job_root / job_id
     job_dir.mkdir(parents=True, exist_ok=True)
