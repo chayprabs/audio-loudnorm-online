@@ -34,11 +34,24 @@ const cancelledJob = {
 describe("AudioSuiteApp", () => {
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ status: "ok", ffmpeg: true, fpcalc: true }),
+      }),
+    );
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
     vi.useRealTimers();
+  });
+
+  it("requires a source before running a tool", async () => {
+    render(<AudioSuiteApp />);
+    fireEvent.click(screen.getAllByRole("button", { name: /Run loudness normalization/i })[0]!);
+    expect(await screen.findByText(/Choose a file, paste a source URL, or select a sample/i)).toBeInTheDocument();
   });
 
   it("renders the required tabs", () => {
@@ -68,6 +81,10 @@ describe("AudioSuiteApp", () => {
     expect(screen.getAllByText("voiceover.mp3").length).toBeGreaterThan(0);
   });
 
+  function selectDefaultSample() {
+    fireEvent.click(screen.getByRole("button", { name: /Podcast clip/i }));
+  }
+
   it("prefixes artifact links with the API base URL", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
@@ -91,6 +108,7 @@ describe("AudioSuiteApp", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(<AudioSuiteApp />);
+    selectDefaultSample();
     fireEvent.click(screen.getAllByRole("button", { name: /Run loudness normalization/i })[0]!);
 
     await waitFor(() => {
@@ -145,6 +163,7 @@ describe("AudioSuiteApp", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(<AudioSuiteApp />);
+    selectDefaultSample();
     fireEvent.click(screen.getAllByRole("button", { name: /Run loudness normalization/i })[0]!);
 
     const cancelButton = await screen.findByRole("button", { name: /Cancel job/i });

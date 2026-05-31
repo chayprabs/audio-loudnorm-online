@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { JsonLd } from "../components/json-ld";
 import "./globals.css";
 
 const siteUrl =
@@ -34,7 +35,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <JsonLd />
+        {children}
+      </body>
     </html>
   );
 }

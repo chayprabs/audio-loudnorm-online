@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from "react";
+import { ResultHighlights } from "./result-highlights";
+import { WorkerStatus } from "./worker-status";
 import { AUDIO_SAMPLES, type AudioSample } from "@audio-suite/shared-types";
 import type { AsyncJobResponse, AsyncJobStatus } from "@audio-suite/shared-worker-runtime";
 import { ResultPane, SectionCard } from "@audio-suite/shared-ui";
@@ -87,8 +89,9 @@ type SilenceSettings = {
 export function AudioSuiteApp() {
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>("loudnorm");
   const [file, setFile] = useState<File | null>(null);
+  const [compareFileB, setCompareFileB] = useState<File | null>(null);
   const [sourceUrl, setSourceUrl] = useState("");
-  const [selectedSample, setSelectedSample] = useState<AudioSample | null>(AUDIO_SAMPLES[0] ?? null);
+  const [selectedSample, setSelectedSample] = useState<AudioSample | null>(null);
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [job, setJob] = useState<AsyncJobStatus | null>(null);
@@ -141,6 +144,15 @@ export function AudioSuiteApp() {
     if (nextFile) {
       setSourceUrl("");
       setSelectedSample(null);
+      setCompareFileB(null);
+    }
+  }
+
+  function applyCompareFileB(nextFile: File | null) {
+    setCompareFileB(nextFile);
+    if (nextFile) {
+      setSelectedSample(null);
+      setSourceUrl("");
     }
   }
 
@@ -195,7 +207,32 @@ export function AudioSuiteApp() {
     setLoading(false);
   }
 
+  function hasSelectedSource() {
+    if (file || sourceUrl.trim()) {
+      return true;
+    }
+    return currentPrimarySampleId() !== null;
+  }
+
   async function submitFeature(feature: FeatureId) {
+    if (!hasSelectedSource()) {
+      setError("Choose a file, paste a source URL, or select a sample clip before running a tool.");
+      return;
+    }
+
+    if (feature === "fingerprint" && fingerprintSettings.compareMode) {
+      const usingUploads = Boolean(file || compareFileB);
+      const usingFixtures = !file && !sourceUrl.trim();
+      if (usingUploads && (!file || !compareFileB)) {
+        setError("Compare mode with uploads requires both file A and file B.");
+        return;
+      }
+      if (!usingUploads && !usingFixtures) {
+        setError("Compare mode needs two fixture samples or two uploaded files.");
+        return;
+      }
+    }
+
     setLoading(true);
     setError(null);
     stopPollingRef.current = false;
@@ -204,6 +241,9 @@ export function AudioSuiteApp() {
       const form = new FormData();
       if (file) {
         form.set("file", file);
+      }
+      if (compareFileB) {
+        form.set("file_b", compareFileB);
       }
       if (!file && sourceUrl) {
         form.set("source_url", sourceUrl);
@@ -281,10 +321,13 @@ export function AudioSuiteApp() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-white px-4 py-3">
-        <div className="flex flex-wrap items-center gap-2 text-sm text-stone-600">
-          <span className="font-medium text-stone-900">{labelForTab(activeTab)}</span>
-          <span aria-hidden>·</span>
-          <span className="max-w-md truncate">{selectedSourceLabel}</span>
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-stone-600">
+            <span className="font-medium text-stone-900">{labelForTab(activeTab)}</span>
+            <span aria-hidden>·</span>
+            <span className="max-w-md truncate">{selectedSourceLabel}</span>
+          </div>
+          <WorkerStatus />
         </div>
         <div className="flex flex-wrap gap-2">
           <button
@@ -479,6 +522,7 @@ export function AudioSuiteApp() {
                   fingerprintSettings={fingerprintSettings}
                   loudnormSettings={loudnormSettings}
                   silenceSettings={silenceSettings}
+                  onCompareFileB={applyCompareFileB}
                   onExtractChange={setExtractSettings}
                   onFingerprintChange={setFingerprintSettings}
                   onLoudnormChange={setLoudnormSettings}
@@ -562,6 +606,7 @@ export function AudioSuiteApp() {
                 ) : null}
               </div>
 
+              <ResultHighlights result={result} />
               <ArtifactLinks result={result} />
               <ResultPane title="Result JSON" value={result ?? { status: "Run a task to inspect worker output." }} />
             </div>
@@ -579,6 +624,7 @@ function FeatureControls(props: {
   fingerprintSettings: FingerprintSettings;
   silenceSettings: SilenceSettings;
   fingerprintSamples: AudioSample[];
+  onCompareFileB: (file: File | null) => void;
   onExtractChange: (value: ExtractSettings) => void;
   onLoudnormChange: (value: LoudnormSettings) => void;
   onFingerprintChange: (value: FingerprintSettings) => void;
@@ -666,13 +712,24 @@ function FeatureControls(props: {
             </span>
           </label>
           {props.fingerprintSettings.compareMode ? (
-            <SelectField
-              label="Comparison sample B"
-              value={props.fingerprintSettings.sampleIdB}
-              options={props.fingerprintSamples.map((sample) => sample.id)}
-              labels={Object.fromEntries(props.fingerprintSamples.map((sample) => [sample.id, sample.label]))}
-              onChange={(value) => props.onFingerprintChange({ ...props.fingerprintSettings, sampleIdB: value })}
-            />
+            <>
+              <SelectField
+                label="Comparison sample B (fixtures)"
+                value={props.fingerprintSettings.sampleIdB}
+                options={props.fingerprintSamples.map((sample) => sample.id)}
+                labels={Object.fromEntries(props.fingerprintSamples.map((sample) => [sample.id, sample.label]))}
+                onChange={(value) => props.onFingerprintChange({ ...props.fingerprintSettings, sampleIdB: value })}
+              />
+              <label className="block space-y-2">
+                <span className="text-sm font-semibold text-stone-900">Or upload file B</span>
+                <input
+                  accept="audio/*,video/*"
+                  className="block w-full text-sm text-stone-600 file:mr-3 file:rounded-full file:border-0 file:bg-stone-950 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-stone-50"
+                  onChange={(event) => props.onCompareFileB(event.target.files?.[0] ?? null)}
+                  type="file"
+                />
+              </label>
+            </>
           ) : null}
         </div>
       ) : null}

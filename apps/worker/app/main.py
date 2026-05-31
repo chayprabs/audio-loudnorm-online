@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -11,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.responses import JSONResponse
 
+from .job_cleanup import purge_expired_jobs
 from .job_store import job_store
 from .media import CommandError, run_command
 from .operations import (
@@ -46,6 +48,15 @@ logger = logging.getLogger("audio-suite.worker")
 logging.basicConfig(level=logging.INFO)
 
 
+async def _cleanup_loop() -> None:
+    while True:
+        await asyncio.sleep(settings.cleanup_interval_seconds)
+        try:
+            purge_expired_jobs()
+        except Exception as exc:
+            logger.warning("Job cleanup failed: %s", exc)
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     settings.job_root.mkdir(parents=True, exist_ok=True)
@@ -55,14 +66,18 @@ async def lifespan(_: FastAPI):
         except Exception as exc:
             version = f"unavailable ({exc})"
         logger.info("%s", version)
+    cleanup_task = asyncio.create_task(_cleanup_loop())
     yield
+    cleanup_task.cancel()
+    with contextlib.suppress(asyncio.CancelledError):
+        await cleanup_task
 
 
 app = FastAPI(title="AudioSuite Worker", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
+    allow_origin_regex=settings.cors_origin_regex,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -120,8 +135,24 @@ async def _run_async_job(
 
 
 @app.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok"}
+async def health() -> dict[str, str | int | bool]:
+    ffmpeg_ok = False
+    fpcalc_ok = False
+    try:
+        ffmpeg_ok = "ffmpeg" in run_command(["ffmpeg", "-version"]).stdout.lower()
+    except Exception:
+        ffmpeg_ok = False
+    try:
+        fpcalc_ok = "fpcalc" in run_command(["fpcalc", "-version"]).stdout.lower()
+    except Exception:
+        fpcalc_ok = False
+    status = "ok" if ffmpeg_ok and fpcalc_ok else "degraded"
+    return {
+        "status": status,
+        "ffmpeg": ffmpeg_ok,
+        "fpcalc": fpcalc_ok,
+        "artifact_ttl_seconds": settings.artifact_ttl_seconds,
+    }
 
 
 @app.get("/v1/samples")

@@ -25,6 +25,8 @@ The repository includes:
 
 ## Local development
 
+Copy `.env.example` to `.env` and adjust values if needed.
+
 ```bash
 pnpm install
 pnpm dev

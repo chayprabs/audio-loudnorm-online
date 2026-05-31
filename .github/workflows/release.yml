@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - "cursor/audio-suite-build"
+      - "main"
     tags:
       - "v*"
   workflow_dispatch:

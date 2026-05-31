@@ -19,7 +19,7 @@ Notable updates in this run:
 - Interactive UI moved to `/` (home page) with top bar, SEO summary bar, and legal footer links.
 - `/workspace` redirects to `/`.
 - Privacy (`/privacy`) and Terms (`/terms`) pages added.
-- `pnpm lint`, `pnpm test`, `pnpm build`, and `pytest apps/worker/tests` (26 passed) all green locally.
+- `pnpm lint`, `pnpm test`, `pnpm build`, and `pytest apps/worker/tests` (97 passed, incl. live input-matrix tests) all green locally.
 - Worker validation fixes for extract, loudnorm, and fingerprint compare inputs.
 
 Verdict: QUALIFIED

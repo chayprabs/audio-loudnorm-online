@@ -84,6 +84,10 @@ class JobStore:
             job.updated_at = datetime.now(timezone.utc)
             return job
 
+    def remove(self, job_id: str) -> None:
+        with self._lock:
+            self._items.pop(job_id, None)
+
     def reset(self) -> None:
         with self._lock:
             self._items.clear()
