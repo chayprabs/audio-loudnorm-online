@@ -1,4 +1,6 @@
 Contact: https://github.com/chayprabs/audio-loudnorm-online/security/advisories/new
+Contact: mailto:security@chaitanyaprabuddha.com
 Expires: 2027-12-31T23:59:59.000Z
 Preferred-Languages: en
 Canonical: https://github.com/chayprabs/audio-loudnorm-online/blob/main/apps/web/public/security.txt
+Policy: https://github.com/chayprabs/audio-loudnorm-online/blob/main/SECURITY.md

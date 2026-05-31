@@ -85,15 +85,23 @@ python scripts/generate_sample_fixtures.py
 
 ## Governance
 
-- [License](LICENSE) (AGPL-3.0-only)
+- [License](LICENSE) (GNU AGPL-3.0-only — software)
+- [NOTICE](NOTICE) (copyright + supplemental hosted-service terms)
+- [Legal overview](LEGAL.md)
 - [Contributing](CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Security Policy](SECURITY.md)
 
 ## Legal (web app routes)
 
-When the web app is running, these pages are served at `/privacy` and `/terms`.
-Source copies live in `apps/web/app/privacy/page.tsx` and `apps/web/app/terms/page.tsx`.
+When the web app is running, open `/privacy` and `/terms` on your deployment.
+
+| Document | Web route | Source |
+|----------|-----------|--------|
+| Privacy Policy | `/privacy` | `apps/web/app/privacy/page.tsx` |
+| Terms & Conditions | `/terms` | `apps/web/app/terms/page.tsx` |
+
+**Note:** No legal document can guarantee immunity from claims in every jurisdiction. If you operate a public deployment, obtain advice from qualified counsel in your country.
 
 ## SEO-friendly routes
 

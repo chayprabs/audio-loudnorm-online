@@ -5,8 +5,9 @@ Please report security issues privately before public disclosure.
 ## Reporting
 
 Use [GitHub Security Advisories](https://github.com/chayprabs/audio-loudnorm-online/security/advisories/new)
-for this repository, or email the maintainer via the contact listed on
-[chaitanyaprabuddha.com](https://www.chaitanyaprabuddha.com).
+for this repository, or email **security@chaitanyaprabuddha.com** (see also `apps/web/public/security.txt`).
+
+For terms of use and liability, see [Terms & Conditions](apps/web/app/terms/page.tsx) and [LEGAL.md](LEGAL.md).
 
 ## Supported versions
 

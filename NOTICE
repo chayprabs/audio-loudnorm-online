@@ -1,0 +1,26 @@
+AudioSuite (audio-loudnorm-online)
+Copyright (c) 2024–2026 Chaitanya Prabuddha and contributors
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any
+later version.
+
+See the file LICENSE for the full AGPL-3.0 license text.
+
+SUPPLEMENTAL TERMS FOR HOSTED / WEB USE
+---------------------------------------
+Use of a publicly hosted AudioSuite website or API is also subject to the
+Terms & Conditions and Privacy Policy provided with that deployment
+(typically at /terms and /privacy). Those documents govern uploads, processing
+outputs, acceptable use, disclaimers, limitation of liability, and indemnity.
+
+The AGPL governs the software. The Terms govern the service experience when
+you interact with a particular operator’s instance.
+
+NO WARRANTY
+-----------
+AudioSuite is provided for general information and technical convenience.
+Loudness measurements, fingerprints, and silence detection are automated
+estimates. They are not certifications of compliance with Spotify, Apple,
+YouTube, EBU, broadcast regulators, or any other platform or legal standard.
