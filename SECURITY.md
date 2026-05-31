@@ -1,7 +1,12 @@
 # Security Policy
 
-Please report security issues privately to the maintainers before public
-disclosure.
+Please report security issues privately before public disclosure.
+
+## Reporting
+
+Use [GitHub Security Advisories](https://github.com/chayprabs/audio-loudnorm-online/security/advisories/new)
+for this repository, or email the maintainer via the contact listed on
+[chaitanyaprabuddha.com](https://www.chaitanyaprabuddha.com).
 
 ## Supported versions
 

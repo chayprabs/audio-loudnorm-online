@@ -66,8 +66,11 @@ The worker logs its detected `ffmpeg` and `fpcalc` versions during
 startup so you can verify the runtime binaries inside the container:
 
 ```bash
-docker logs audio-loudnorm-online-worker-1 --tail 20
+docker compose logs worker --tail 20
 ```
+
+Set `NEXT_PUBLIC_SITE_URL` to your public web origin in production so sitemap,
+robots, and Open Graph metadata use the correct hostname.
 
 ## Sample fixtures
 
@@ -78,10 +81,17 @@ worker smoke tests, and acceptance checks.
 python scripts/generate_sample_fixtures.py
 ```
 
-## Legal
+## Governance
 
-- [Privacy Policy](/privacy) (web route)
-- [Terms & Conditions](/terms) (web route)
+- [License](LICENSE) (AGPL-3.0-only)
+- [Contributing](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Security Policy](SECURITY.md)
+
+## Legal (web app routes)
+
+When the web app is running, these pages are served at `/privacy` and `/terms`.
+Source copies live in `apps/web/app/privacy/page.tsx` and `apps/web/app/terms/page.tsx`.
 
 ## SEO-friendly routes
 
