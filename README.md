@@ -9,9 +9,9 @@ production workflows.
 
 ## Status
 
-The repository now includes:
+The repository includes:
 
-- A Next.js 15 playground in `apps/web`
+- A Next.js 15 playground in `apps/web` with the tool on the home page
 - A FastAPI worker in `apps/worker`
 - Local synthetic sample fixtures in `samples/`
 - Async job polling, cancellation, and webhook delivery
@@ -35,10 +35,13 @@ Worker development:
 ```bash
 cd apps/worker
 python -m venv .venv
-.venv\Scripts\activate
+source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
+
+Set `NEXT_PUBLIC_AUDIO_SUITE_API_BASE_URL=http://localhost:8000` when
+running the web app against a local worker.
 
 Docker Compose uses `AUDIO_SUITE_WEB_PORT`,
 `AUDIO_SUITE_WORKER_PORT`, and `AUDIO_SUITE_WORKER_PUBLIC_URL` when
@@ -46,45 +49,39 @@ you need non-default host ports.
 
 ## Self-host with Docker
 
-```powershell
-$env:AUDIO_SUITE_WEB_PORT="3002"
-$env:AUDIO_SUITE_WORKER_PUBLIC_URL="http://localhost:8000"
+```bash
+export AUDIO_SUITE_WEB_PORT=3002
+export AUDIO_SUITE_WORKER_PUBLIC_URL=http://localhost:8000
 docker compose up --build -d
 ```
 
 Then open `http://localhost:3002` for the playground and
 `http://localhost:8000/health` for the worker health check.
 
-The root route is a static landing page for fast discovery and SEO.
-Open `http://localhost:3002/workspace` for the full interactive
-AudioSuite UI with tabs, async progress, cancellation, and artifact
-links.
+The home page is the interactive UI: Extract, Loudnorm, Peaks,
+Fingerprint, and Silence tabs with async progress, cancellation, and
+artifact links. `/workspace` redirects to `/`.
 
 The worker logs its detected `ffmpeg` and `fpcalc` versions during
 startup so you can verify the runtime binaries inside the container:
 
-```powershell
+```bash
 docker logs audio-loudnorm-online-worker-1 --tail 20
 ```
 
 ## Sample fixtures
 
 Synthetic fixtures live in `samples/` and back the in-app sample picker,
-worker smoke tests, and future acceptance checks.
+worker smoke tests, and acceptance checks.
 
 ```bash
 python scripts/generate_sample_fixtures.py
 ```
 
-## Container smoke check
+## Legal
 
-When Docker Desktop is running, this script builds the worker image and
-exercises sample-based probe, extract, loudnorm, peaks, fingerprint,
-and silence endpoints:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/smoke_worker_container.ps1
-```
+- [Privacy Policy](/privacy) (web route)
+- [Terms & Conditions](/terms) (web route)
 
 ## SEO-friendly routes
 

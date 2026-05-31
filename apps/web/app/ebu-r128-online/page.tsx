@@ -1,22 +1,16 @@
 import type { Metadata } from "next";
-import { AudioSuiteLanding } from "../../components/audio-suite-landing";
+import { SeoLandingPage } from "../../components/seo-landing-page";
 
 export const metadata: Metadata = {
   title: "EBU R128 Online",
-  description:
-    "Normalize audio to EBU R128 targets online with open-source FFmpeg loudnorm presets and artifact downloads.",
+  description: "Broadcast-safe EBU R128 loudness normalization online with two-pass measurement reports.",
 };
 
 export default function EbuR128OnlinePage() {
   return (
-    <AudioSuiteLanding
-      eyebrow="Broadcast loudness targets"
+    <SeoLandingPage
       title="EBU R128 Online"
-      description="Use the AudioSuite workspace for broadcast-safe loudness normalization, JSON reporting, and downloadable normalized audio."
-      ctaLabel="Open EBU workspace"
-      ctaHref="/workspace"
-      secondaryLabel="Loudnorm route"
-      secondaryHref="/loudnorm-online"
+      description="Apply broadcast EBU (-23 LUFS) loudness normalization with true-peak limiting and before/after loudness reports using the open-source AudioSuite worker."
     />
   );
 }

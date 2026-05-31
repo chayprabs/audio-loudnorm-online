@@ -1,22 +1,17 @@
 import type { Metadata } from "next";
-import { AudioSuiteLanding } from "../../components/audio-suite-landing";
+import { SeoLandingPage } from "../../components/seo-landing-page";
 
 export const metadata: Metadata = {
   title: "Podcast Loudnorm",
   description:
-    "Normalize podcast audio online with Apple and Spotify loudness targets using the AudioSuite workspace.",
+    "Normalize podcast audio online with Apple (-16 LUFS) and Spotify (-14 LUFS) loudness targets.",
 };
 
 export default function PodcastLoudnormPage() {
   return (
-    <AudioSuiteLanding
-      eyebrow="Podcast mastering"
+    <SeoLandingPage
       title="Podcast Loudnorm"
-      description="Bring spoken-word audio into Apple and Spotify loudness ranges with two-pass normalization and downloadable outputs."
-      ctaLabel="Open podcast workspace"
-      ctaHref="/workspace"
-      secondaryLabel="Waveform generator"
-      secondaryHref="/waveform-generator"
+      description="Prepare podcast episodes for Apple Podcasts and Spotify with preset loudness targets, async job progress, and artifact downloads."
     />
   );
 }

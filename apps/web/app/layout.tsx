@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "AudioSuite",
     description:
-      "Extract audio, normalize to EBU R128 targets, generate waveform peaks, compare Chromaprint fingerprints, and trim silence in one open-source workspace.",
+      "Extract audio, normalize to EBU R128 targets, generate waveform peaks, compare Chromaprint fingerprints, and trim silence in one open-source tool.",
     type: "website",
     url: "/",
     siteName: "AudioSuite",

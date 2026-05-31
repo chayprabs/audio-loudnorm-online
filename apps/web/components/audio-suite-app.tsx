@@ -11,9 +11,7 @@ import {
   CircleDot,
   Link2,
   LoaderCircle,
-  Sparkles,
   UploadCloud,
-  Waves,
   XCircle,
 } from "lucide-react";
 
@@ -157,16 +155,24 @@ export function AudioSuiteApp() {
   }
 
   async function pollJob(jobId: string) {
+    let lastJob: AsyncJobStatus | null = null;
+
     for (;;) {
+      if (stopPollingRef.current) {
+        return lastJob;
+      }
+
       const response = await fetch(`${API_BASE_URL}/v1/jobs/${jobId}`);
       const nextJob = (await response.json()) as AsyncJobStatus;
-      setJob(nextJob);
+      lastJob = nextJob;
 
-      if (nextJob.status === "completed" || nextJob.status === "failed" || nextJob.status === "cancelled") {
+      if (stopPollingRef.current) {
         return nextJob;
       }
 
-      if (stopPollingRef.current) {
+      setJob(nextJob);
+
+      if (nextJob.status === "completed" || nextJob.status === "failed" || nextJob.status === "cancelled") {
         return nextJob;
       }
 
@@ -254,10 +260,12 @@ export function AudioSuiteApp() {
 
       if ("job_id" in payload && typeof payload.job_id === "string") {
         const finalJob = await pollJob(payload.job_id);
-        setJob(finalJob);
-        setResult((finalJob.result as Record<string, unknown> | null) ?? null);
-        if (finalJob.error) {
-          setError(finalJob.error);
+        if (!stopPollingRef.current && finalJob) {
+          setJob(finalJob);
+          setResult((finalJob.result as Record<string, unknown> | null) ?? null);
+          if (finalJob.error) {
+            setError(finalJob.error);
+          }
         }
       } else {
         setResult(payload as Record<string, unknown>);
@@ -271,75 +279,34 @@ export function AudioSuiteApp() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 px-4 py-6 md:px-8 md:py-8">
-      <section className="overflow-hidden rounded-[2rem] border border-stone-200/60 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(245,245,244,0.88))] p-6 shadow-[0_24px_80px_rgba(28,25,23,0.08)] backdrop-blur md:p-8">
-        <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-stone-300/80 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">
-              <Sparkles className="size-3.5 text-amber-500" />
-              Direct audio tools
-            </div>
-            <div className="space-y-3">
-              <h1 className="max-w-3xl text-4xl font-semibold tracking-[-0.04em] text-stone-950 md:text-6xl">
-                AudioSuite gets you from source to export without the dashboard sprawl.
-              </h1>
-              <p className="max-w-2xl text-base leading-7 text-stone-600 md:text-lg">
-                Pick one source, choose one tool, and get the output you need: extract, loudnorm, peaks,
-                fingerprint, or silence trim.
-              </p>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              <StepCard
-                step="1"
-                title="Choose a source"
-                body="Drop a file, paste a URL, or use a local fixture."
-              />
-              <StepCard
-                step="2"
-                title="Pick a tool"
-                body="Switch tabs, adjust only the settings that matter, and stay on one page."
-              />
-              <StepCard
-                step="3"
-                title="Run and download"
-                body="Watch progress, inspect JSON, and open the generated artifacts."
-              />
-            </div>
-          </div>
-
-          <aside className="grid gap-3 self-start rounded-[1.75rem] border border-stone-200 bg-white/75 p-4 shadow-[0_12px_40px_rgba(28,25,23,0.08)]">
-            <StatusRow label="Current tool" value={labelForTab(activeTab)} />
-            <StatusRow label="Source" value={selectedSourceLabel} />
-            <StatusRow label="Async jobs" value="Progress, cancellation, optional webhook" />
-            <div className="rounded-[1.25rem] border border-stone-200 bg-stone-50 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Recommended flow</p>
-              <p className="mt-2 text-sm leading-6 text-stone-700">
-                Run <strong>Probe</strong> first when you want a baseline, then use the active tool for the final
-                artifact.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <button
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-stone-950 px-4 py-3 text-sm font-semibold text-stone-50 transition hover:bg-stone-800"
-                onClick={() => submitFeature("probe")}
-                type="button"
-              >
-                <AudioLines className="size-4" />
-                Run probe
-              </button>
-              <button
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-3 text-sm font-medium text-stone-700 transition hover:border-stone-400 hover:bg-stone-50"
-                onClick={() => submitFeature(activeTab)}
-                type="button"
-              >
-                {loading ? <LoaderCircle className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
-                {activeTool.runLabel}
-              </button>
-            </div>
-          </aside>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-white px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-stone-600">
+          <span className="font-medium text-stone-900">{labelForTab(activeTab)}</span>
+          <span aria-hidden>·</span>
+          <span className="max-w-md truncate">{selectedSourceLabel}</span>
         </div>
-      </section>
+        <div className="flex flex-wrap gap-2">
+          <button
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:border-stone-400 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={loading}
+            onClick={() => submitFeature("probe")}
+            type="button"
+          >
+            <AudioLines className="size-4" />
+            Probe
+          </button>
+          <button
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-stone-950 px-4 py-2 text-sm font-semibold text-stone-50 transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={loading}
+            onClick={() => submitFeature(activeTab)}
+            type="button"
+          >
+            {loading ? <LoaderCircle className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
+            {activeTool.runLabel}
+          </button>
+        </div>
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <div className="space-y-6">
@@ -542,7 +509,8 @@ export function AudioSuiteApp() {
                   </div>
                   <div className="flex flex-wrap gap-3">
                     <button
-                      className="inline-flex items-center justify-center gap-2 rounded-full bg-stone-950 px-5 py-3 text-sm font-semibold text-stone-50 transition hover:bg-stone-800"
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-stone-950 px-5 py-3 text-sm font-semibold text-stone-50 transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      disabled={loading}
                       onClick={() => submitFeature(activeTab)}
                       type="button"
                     >
@@ -600,7 +568,7 @@ export function AudioSuiteApp() {
           </SectionCard>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 
@@ -841,25 +809,6 @@ function InputField(props: {
         value={props.value}
       />
     </label>
-  );
-}
-
-function StepCard(props: { step: string; title: string; body: string }) {
-  return (
-    <div className="rounded-[1.4rem] border border-stone-200 bg-white/75 p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Step {props.step}</p>
-      <h2 className="mt-2 text-base font-semibold text-stone-950">{props.title}</h2>
-      <p className="mt-2 text-sm leading-6 text-stone-600">{props.body}</p>
-    </div>
-  );
-}
-
-function StatusRow(props: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4 rounded-[1.15rem] border border-stone-200 bg-stone-50 px-4 py-3 text-sm">
-      <span className="text-stone-500">{props.label}</span>
-      <span className="max-w-[16rem] truncate font-medium text-stone-900">{props.value}</span>
-    </div>
   );
 }
 

@@ -10,6 +10,8 @@ const routes = [
   "/podcast-loudnorm",
   "/audio-fingerprint-online",
   "/waveform-generator",
+  "/privacy",
+  "/terms",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

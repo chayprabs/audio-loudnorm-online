@@ -1,22 +1,16 @@
 import type { Metadata } from "next";
-import { AudioSuiteLanding } from "../../components/audio-suite-landing";
+import { SeoLandingPage } from "../../components/seo-landing-page";
 
 export const metadata: Metadata = {
   title: "Audio Fingerprint Online",
-  description:
-    "Generate Chromaprint fingerprints and compare near-duplicate audio files online with AudioSuite.",
+  description: "Generate Chromaprint fingerprints and compare near-duplicate audio online.",
 };
 
 export default function AudioFingerprintOnlinePage() {
   return (
-    <AudioSuiteLanding
-      eyebrow="Chromaprint matching"
+    <SeoLandingPage
       title="Audio Fingerprint Online"
-      description="Generate fingerprints, compare fixture pairs, and inspect duplicate scores in the AudioSuite workspace."
-      ctaLabel="Open fingerprint workspace"
-      ctaHref="/workspace"
-      secondaryLabel="Waveform route"
-      secondaryHref="/waveform-generator"
+      description="Create Chromaprint fingerprints from uploads or samples and compare near-duplicate pairs with a reproducible similarity score."
     />
   );
 }

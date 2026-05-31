@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AudioSuiteLanding } from "../../components/audio-suite-landing";
+import { SeoLandingPage } from "../../components/seo-landing-page";
 
 export const metadata: Metadata = {
   title: "Loudnorm Online",
@@ -9,14 +9,9 @@ export const metadata: Metadata = {
 
 export default function LoudnormOnlinePage() {
   return (
-    <AudioSuiteLanding
-      eyebrow="EBU R128 loudness normalization"
+    <SeoLandingPage
       title="Loudnorm Online"
-      description="Use AudioSuite to run single-pass or two-pass loudnorm processing with platform presets and downloadable artifacts."
-      ctaLabel="Open loudnorm workspace"
-      ctaHref="/workspace"
-      secondaryLabel="Podcast loudnorm"
-      secondaryHref="/podcast-loudnorm"
+      description="Normalize podcast and video audio to platform targets with single-pass or two-pass EBU R128 loudness processing, integrated LUFS reporting, and downloadable artifacts."
     />
   );
 }

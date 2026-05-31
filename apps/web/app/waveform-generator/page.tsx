@@ -1,22 +1,16 @@
 import type { Metadata } from "next";
-import { AudioSuiteLanding } from "../../components/audio-suite-landing";
+import { SeoLandingPage } from "../../components/seo-landing-page";
 
 export const metadata: Metadata = {
   title: "Waveform Generator",
-  description:
-    "Generate multi-zoom waveform JSON and PNG artifacts online with the AudioSuite peaks workspace.",
+  description: "Generate multi-zoom waveform JSON peaks and PNG previews online.",
 };
 
 export default function WaveformGeneratorPage() {
   return (
-    <AudioSuiteLanding
-      eyebrow="Waveform generation"
+    <SeoLandingPage
       title="Waveform Generator"
-      description="Create waveform peaks JSON and PNG previews from the AudioSuite workspace without leaving the browser."
-      ctaLabel="Open peaks workspace"
-      ctaHref="/workspace"
-      secondaryLabel="Root route"
-      secondaryHref="/"
+      description="Produce downsampled multi-zoom waveform JSON and PNG preview images for editors, players, and documentation."
     />
   );
 }
