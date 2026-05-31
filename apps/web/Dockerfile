@@ -1,4 +1,4 @@
-FROM node:24-bookworm-slim AS base
+FROM node:26-bookworm-slim AS base
 
 WORKDIR /app
 
@@ -29,7 +29,7 @@ COPY packages/shared-worker-runtime packages/shared-worker-runtime
 RUN pnpm install --offline --frozen-lockfile=false
 RUN pnpm --filter @audio-suite/web build
 
-FROM node:24-bookworm-slim AS runner
+FROM node:26-bookworm-slim AS runner
 
 WORKDIR /app
 
